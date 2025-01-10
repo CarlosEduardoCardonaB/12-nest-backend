@@ -3,17 +3,27 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcryptjs from 'bcryptjs';
 
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+//De esta manera exportamos cada dto (data transfer object) 
+// import { CreateUserDto } from './dto/create-user.dto';
+// import { UpdateAuthDto } from './dto/update-auth.dto';
+// import { LoginDto } from './dto/login.dto';
+// import { RegisterDto } from './dto/register-user.dto';
+
+//De esta manera exportamos lo mismo que los anteriores, pero implementando el archivo index.ts en la carpeta /dto
+import { CreateUserDto, UpdateAuthDto, LoginDto, RegisterUserDto } from './dto'
+
 import { User } from './entities/user.entity';
-import { LoginDto } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from './interfaces/jwt-payload';
+import { LoginResponse } from './interfaces/login-response';
 
 @Injectable()
 export class AuthService {
 
   constructor(
     @InjectModel(User.name) 
-    private userModel: Model<User>
+    private userModel: Model<User>,
+    private jwtService: JwtService
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -53,7 +63,33 @@ export class AuthService {
     // 3- generar el JWT    
   }
 
-  async login( loginDto: LoginDto){
+  async register(registerUserDto: RegisterUserDto):Promise<LoginResponse>{
+
+    const { password, confirmPassword, email, name} = registerUserDto;
+    if( password != confirmPassword ) 
+      {
+        throw new BadRequestException('Password y confirmación de password no coinciden.');
+    }
+    
+    //Una fomra de enviarlo
+    // var newUser = new CreateUserDto;
+    // newUser.email = email;
+    // newUser.name = name;
+    // newUser.password = password
+    //const userCreated = this.create(newUser);
+
+    //Otra forma de enviarlo
+    const userCreated = await this.create({email: registerUserDto.email, name: registerUserDto.name, password: registerUserDto.password});
+
+   return {
+    user: userCreated,
+    token: this.getJwtToken({ id: userCreated._id})
+   }
+
+  }
+
+
+  async login( loginDto: LoginDto): Promise<LoginResponse>{
 
     //console.log({ loginDto });
     const { email, password } = loginDto;
@@ -71,7 +107,7 @@ export class AuthService {
 
     return {
       user: rest,
-      token: 'ABC-123'
+      token: this.getJwtToken( {id: user.id} )
     }
 
 
@@ -98,4 +134,12 @@ export class AuthService {
   remove(id: number) {
     return `This action removes a #${id} auth`;
   }
+
+
+  getJwtToken( payload: JwtPayload){
+      const token = this.jwtService.sign(payload);
+      return token;
+  }
+
+
 }

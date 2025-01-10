@@ -3,8 +3,8 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 @Schema()
 export class User {
 
-    //mongo coloca de manera automática este id que dejo como referencia comentado 
-    //_id: string;
+    //dejamos el _id como opcional por que en algunas creaciones se va a retornar después de la creación del usuario
+    _id?: string;
     @Prop({ unique: true, required: true })
     email: string;
     @Prop({ required: true })

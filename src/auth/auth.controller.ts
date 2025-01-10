@@ -1,8 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
-import { LoginDto } from './dto/login.dto';
+
+//De esta manera exportamos cada dto (data transfer object) 
+// import { CreateUserDto } from './dto/create-user.dto';
+// import { UpdateAuthDto } from './dto/update-auth.dto';
+// import { LoginDto } from './dto/login.dto';
+// import { RegisterDto } from './dto/register-user.dto';
+
+//De esta manera exportamos lo mismo que los anteriores, pero implementando el archivo index.ts en la carpeta /dto
+import { CreateUserDto, UpdateAuthDto, LoginDto, RegisterUserDto } from './dto'
 
 @Controller('auth')
 export class AuthController {
@@ -18,6 +24,12 @@ export class AuthController {
   login(@Body() loginDto: LoginDto) {
     //return('login works');
     return this.authService.login(loginDto);
+  }
+
+  @Post('/register')
+  register(@Body() registerUserDto: RegisterUserDto) {
+    //console.log(CreateUserDto);
+    return this.authService.register(registerUserDto);
   }
 
   @Get()
