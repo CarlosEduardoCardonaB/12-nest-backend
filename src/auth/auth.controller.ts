@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 //De esta manera exportamos cada dto (data transfer object) 
@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 
 //De esta manera exportamos lo mismo que los anteriores, pero implementando el archivo index.ts en la carpeta /dto
 import { CreateUserDto, UpdateAuthDto, LoginDto, RegisterUserDto } from './dto'
+import { AuthGuard } from './guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -32,9 +33,15 @@ export class AuthController {
     return this.authService.register(registerUserDto);
   }
 
+  @UseGuards( AuthGuard )
   @Get()
-  findAll() {
+  findAll( @Request() req: Request ) {
+    //console.log(req);    
     return this.authService.findAll();
+
+    //Con esto retornamos la información de un usuario solamente, con el anterior retornamos todos los usuarios
+    //const user = req['user'];   
+    //return user;
   }
 
   @Get(':id')

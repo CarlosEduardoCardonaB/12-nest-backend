@@ -9,7 +9,10 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [
+    AuthService
+  
+  ],
   imports: [ 
     ConfigModule.forRoot(),
     MongooseModule.forFeature([
