@@ -8,8 +8,11 @@ import { AuthService } from './auth.service';
 // import { RegisterDto } from './dto/register-user.dto';
 
 //De esta manera exportamos lo mismo que los anteriores, pero implementando el archivo index.ts en la carpeta /dto
-import { CreateUserDto, UpdateAuthDto, LoginDto, RegisterUserDto } from './dto'
+import { CreateUserDto, LoginDto, RegisterUserDto } from './dto'
 import { AuthGuard } from './guards/auth.guard';
+import { promises } from 'dns';
+import { LoginResponse } from './interfaces/login-response';
+import { User } from './entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -44,18 +47,32 @@ export class AuthController {
     //return user;
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  //Método para refrescar el token del usuario, recibe como argumento solo el "Bearer token"
+  @UseGuards( AuthGuard )
+  @Get('/check-token')
+  checkToken(@Request() req: Request): LoginResponse{
+
+    //Aqui obtenemos el user del req por lo que en el "AuthGuard" ya lo estamos obteniendo y validando que el usuario esté activo
+    const user = req['user'] as User;
+    
+    return {
+      user,
+      token: this.authService.getJwtToken({ id: user._id})
+    }
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.authService.findOne(+id);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
+  //   return this.authService.update(+id, updateAuthDto);
+  // }
+
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.authService.remove(+id);
+  // }
 }
